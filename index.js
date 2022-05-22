@@ -1,20 +1,45 @@
 // const body = document.querySelector("body");
 const input = document.getElementById("weather");
 const submitButton = document.getElementById("submit-button");
+const background = document.getElementById("background");
 
 submitButton.addEventListener("click", clickEventGetWeather);
 
 async function getWeather(location) {
   try {
     const locationData = await fetch(
-      `http://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&APPID=4f1d800a4d7d5a883081c7932caeb820`,
+      `http://api.openweathermap.org/data/2.5/weather?q=${location}_weather&units=metric&APPID=4f1d800a4d7d5a883081c7932caeb820`,
       { mode: "cors" }
     );
     const locationWeather = await locationData.json();
     const temperature = locationWeather.main.temp;
+    console.log(locationWeather);
 
     createTemperatureDisplay(temperature, location);
-    changeBackground(location);
+    await changeBackground(location)
+      .then((img) => {
+        const photoUrl = img.urls.raw;
+        const image = new Image();
+        image.src = photoUrl;
+        console.log(photoUrl);
+        return image;
+        // background.style.backgroundImage = `url('${photoUrl}')`;
+      })
+      .then((image) => {
+        const images = background.querySelector("img");
+        background.style.backgroundImage = image.src;
+        image.classList.add("background-imagery");
+        if (images) {
+          images.remove();
+        }
+
+        background.append(image);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+    // await changeBackground(location);
+    // removeModal();
   } catch (err) {
     console.log(err);
   }
@@ -47,17 +72,22 @@ async function changeBackground(location) {
     { mode: "cors" }
   );
   const imageData = response.json();
-  console.log(imageData);
-  imageData
-    .then((img) => {
-      console.log(img);
-      const photoUrl = img.urls.raw + " weather";
-      console.log(photoUrl);
-      document.body.style.backgroundImage = `url('${photoUrl}')`;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-  // document.body.style.backgroundImage = `url('https://api.unsplash.com/photos?query=${location}&client_id=BLSXzIUOjLqf4jA99BGQR98-uFjc7VHA42VcJawH3wI')`;
+  // console.log(imageData);
+  return imageData;
 }
-// https://api.unsplash.com/photos?query=London?client_id=BLSXzIUOjLqf4jA99BGQR98-uFjc7VHA42VcJawH3wI
+
+async function waitForBg() {}
+
+function createModal() {
+  const content = document.getElementById("content");
+  const modal = document.createElement("div");
+  modal.id = "modal";
+  modal.style.backgroundImage =
+    "url('./cupertino_activity_indicator_selective.gif')";
+
+  content.appendChild(modal);
+}
+function removeModal() {
+  const modal = document.getElementById("modal");
+  modal.remove();
+}
