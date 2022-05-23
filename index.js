@@ -1,19 +1,29 @@
-// const body = document.querySelector("body");
 const input = document.getElementById("weather");
 const submitButton = document.getElementById("submit-button");
 const background = document.getElementById("background");
 
-submitButton.addEventListener("click", clickEventGetWeather);
+submitButton.addEventListener("click", SubmitEventAndGetInput);
 
 async function getWeather(location) {
   try {
+    const weatherForm = document.querySelector("form");
+    if (weatherForm.querySelector("p")) {
+      weatherForm.querySelector("p").remove();
+    }
+
     const locationData = await fetch(
       `http://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&APPID=4f1d800a4d7d5a883081c7932caeb820`,
       { mode: "cors" }
     );
+
     const locationWeather = await locationData.json();
-    // const weatherData = locationWeather.main;
-    console.log(locationWeather);
+    if (locationWeather.cod === "404") {
+      const errorParagraph = document.createElement("p");
+      errorParagraph.innerHTML =
+        "Error 404; location was not found in the weather API";
+      weatherForm.append(errorParagraph);
+      return;
+    }
 
     createTemperatureDisplay(locationWeather, location);
     changeBackground(location)
@@ -46,7 +56,7 @@ async function getWeather(location) {
   }
 }
 
-function clickEventGetWeather(e) {
+function SubmitEventAndGetInput(e) {
   e.preventDefault();
   const location = input.value;
   getWeather(location);
@@ -57,11 +67,7 @@ function createTemperatureDisplay(weatherData, location) {
   const content = document.querySelector("#content");
   const temperaturePara = content.querySelector("#temperature-paragraph");
   const previousTemperatureParagraph = content.querySelector("p");
-
-  //Create new DOM entries
-  const displayingInfoForParagraph = document.createElement("p");
-  const displayingWeatherType = document.createElement("p");
-
+  //Compose string with weather data
   const weatherTextString =
     `Displaying info for: ${location}` +
     "<br>" +
@@ -75,8 +81,6 @@ function createTemperatureDisplay(weatherData, location) {
 
   if (previousTemperatureParagraph) {
     //If they exist, update fields
-
-    // displayingInfoForParagraph.innerHTML = "";
     previousTemperatureParagraph.innerHTML = weatherTextString;
   } else {
     //Create the fields
@@ -94,18 +98,14 @@ async function changeBackground(location) {
   return imageData;
 }
 
-// async function waitForBg() {}
+// function createModal() {
+//   const content = document.getElementById("content");
+//   const modal = document.createElement("div");
+//   modal.id = "modal";
 
-function createModal() {
-  const content = document.getElementById("content");
-  const modal = document.createElement("div");
-  modal.id = "modal";
-  // modal.style.backgroundImage =
-  // "url('./cupertino_activity_indicator_selective.gif')";
-
-  content.appendChild(modal);
-}
-function removeModal() {
-  const modal = document.getElementById("modal");
-  modal.remove();
-}
+//   content.appendChild(modal);
+// }
+// function removeModal() {
+//   const modal = document.getElementById("modal");
+//   modal.remove();
+// }
