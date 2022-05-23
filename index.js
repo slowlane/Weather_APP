@@ -30,6 +30,7 @@ async function getWeather(location) {
       .then((image) => {
         const images = background.querySelector("img");
         if (images) {
+          //This is to delete the old image after the new image has already faded in.
           const imageNode = images;
           setTimeout(function () {
             imageNode.remove();
@@ -40,8 +41,6 @@ async function getWeather(location) {
       .catch((err) => {
         console.error(err);
       });
-    // await changeBackground(location);
-    // removeModal();
   } catch (err) {
     console.log(err);
   }
