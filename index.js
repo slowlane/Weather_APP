@@ -8,31 +8,33 @@ submitButton.addEventListener("click", clickEventGetWeather);
 async function getWeather(location) {
   try {
     const locationData = await fetch(
-      `http://api.openweathermap.org/data/2.5/weather?q=${location}_weather&units=metric&APPID=4f1d800a4d7d5a883081c7932caeb820`,
+      `http://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&APPID=4f1d800a4d7d5a883081c7932caeb820`,
       { mode: "cors" }
     );
     const locationWeather = await locationData.json();
-    const temperature = locationWeather.main.temp;
+    // const weatherData = locationWeather.main;
     console.log(locationWeather);
 
-    createTemperatureDisplay(temperature, location);
-    await changeBackground(location)
+    createTemperatureDisplay(locationWeather, location);
+    changeBackground(location)
       .then((img) => {
         const photoUrl = img.urls.raw;
         const image = new Image();
+
         image.src = photoUrl;
-        console.log(photoUrl);
+        image.classList.add("fade-in");
+        image.classList.add("background-imagery");
+
         return image;
-        // background.style.backgroundImage = `url('${photoUrl}')`;
       })
       .then((image) => {
         const images = background.querySelector("img");
-        background.style.backgroundImage = image.src;
-        image.classList.add("background-imagery");
         if (images) {
-          images.remove();
+          const imageNode = images;
+          setTimeout(function () {
+            imageNode.remove();
+          }, 5000);
         }
-
         background.append(image);
       })
       .catch((err) => {
@@ -51,39 +53,56 @@ function clickEventGetWeather(e) {
   getWeather(location);
 }
 
-function createTemperatureDisplay(temp, location) {
+function createTemperatureDisplay(weatherData, location) {
+  //Get data from DOM
   const content = document.querySelector("#content");
   const temperaturePara = content.querySelector("#temperature-paragraph");
   const previousTemperatureParagraph = content.querySelector("p");
-  // let temperaturePara;
+
+  //Create new DOM entries
+  const displayingInfoForParagraph = document.createElement("p");
+  const displayingWeatherType = document.createElement("p");
+
+  const weatherTextString =
+    `Displaying info for: ${location}` +
+    "<br>" +
+    `Current temperature: ${weatherData.main.temp}C` +
+    "<br>" +
+    `Humidity: ${weatherData.main.humidity}%` +
+    "<br>" +
+    `Feels like: ${weatherData.main["feels_like"]}C` +
+    "<br>" +
+    `Weather: ${weatherData.weather[0].description}`;
 
   if (previousTemperatureParagraph) {
-    previousTemperatureParagraph.innerHTML = `Temperature in ${location} is ${temp} degrees celsius`;
+    //If they exist, update fields
+
+    // displayingInfoForParagraph.innerHTML = "";
+    previousTemperatureParagraph.innerHTML = weatherTextString;
   } else {
-    // temperaturePara = document.createElement("p");
-    temperaturePara.innerHTML = `Temperature in ${location} is ${temp} degrees celsius`;
+    //Create the fields
+    temperaturePara.innerHTML = weatherTextString;
     content.appendChild(temperaturePara);
   }
 }
 
 async function changeBackground(location) {
   const response = await fetch(
-    `https://api.unsplash.com/photos/random?query=${location}&client_id=BLSXzIUOjLqf4jA99BGQR98-uFjc7VHA42VcJawH3wI`,
+    `https://api.unsplash.com/photos/random?query=${location} weather city&client_id=BLSXzIUOjLqf4jA99BGQR98-uFjc7VHA42VcJawH3wI`,
     { mode: "cors" }
   );
   const imageData = response.json();
-  // console.log(imageData);
   return imageData;
 }
 
-async function waitForBg() {}
+// async function waitForBg() {}
 
 function createModal() {
   const content = document.getElementById("content");
   const modal = document.createElement("div");
   modal.id = "modal";
-  modal.style.backgroundImage =
-    "url('./cupertino_activity_indicator_selective.gif')";
+  // modal.style.backgroundImage =
+  // "url('./cupertino_activity_indicator_selective.gif')";
 
   content.appendChild(modal);
 }
